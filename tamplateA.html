@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<!-- background: url("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRjLqiGSxuWr2IDFpueBdy9ZIm_BxvnHOt7z8k1XCeIIoHf-lk9&usqp=CAU") repeat; -->
+		<style>
+			canvas {
+				position: absolute;
+				width: 400;
+				height: 400;
+				left: 50%;
+				top: 50%;
+				margin-left: -300px; /* This is half the width */
+				margin-top: -200px; /* This is half the height */
+			}
+			body{
+				
+				background-image: linear-gradient(to right, #bdc3c7, #2c3e50);
+			}
+			div.transbox {
+			  margin: 30px;
+			  background-color: #ffffff;
+			  border: 1px solid black;
+			  opacity: 0.6;
+			}
+			h1{
+				text-align:center; 
+				text-decoration: underline;
+				font-family: "Times New Roman", Times, serif;
+				font-size: 50px;
+			}
+		</style>
+	</head>
+	<body>
+	<div class="transbox">
+		<h1>Knight's tour</h1>
+		<p id="moves" style="font-size: 20px; font-weight:bold; text-align:center; ">Start: </p>
+	</div>
+
+	<canvas id="myCanvas" width="640" height="640" class="canvas" style="border:1px solid #c3c3c3;"> </canvas>
+	
+	<script>
+		var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+		var rows = [rows];
+		var cols = [cols];
+		var square = 70;
+		var interval = 100;
+		var str = "{}";
+
+		start_canvas(str, rows, cols, square, interval);
+
+		
+		function letter(x){
+			if (x == '0'){return 'A';}
+			else if (x == '1') {return 'B';}
+			else if (x == '2') {return 'C';}
+			else if (x == '3') {return 'D';}
+			else if (x == '4') {return 'E';}
+			else if (x == '5') {return 'F';}
+			else if (x == '6') {return 'G';}
+			else if (x == '7') {return 'H';}
+			return '-1';
+		}
+		
+		function number(x){
+			var num = parseInt(x);
+			num += 1;
+			return num.toString();
+		}
+		
+		function set_moves(str){
+			var moves = "Start: ";
+			var arr = str.split(" ");
+			var pos1, pos2;
+			
+			for (var i = 0; i < arr.length; i++) {
+				pos1 = arr[i].split(',')[0];
+				pos2 = arr[i].split(',')[1];
+				moves += letter(pos1) + number(pos2) + " ";
+			}
+			return moves + " END";
+		}
+		
+		function position(x, square){
+			return ((x)*(square) -(square/2));
+		}
+
+		function draw_board(rows, cols, square){
+			var canvas = document.getElementById("myCanvas");
+			var ctx = canvas.getContext("2d");
+			var i;
+			
+			for (i = 0; i < rows; i++) {
+				for (j = 0; j < cols; j++) {
+					if (i == 0){
+						if (j == 0){ctx.fillStyle = "#000000"; ctx.fillRect(j*square,i*square,square,square);}
+						else{
+							ctx.font = "30px Arial";
+							ctx.fillStyle = "#000000";
+							ctx.fillText(j.toString(), (square*(j+1)) - ((square/2)+10), 50);
+						}
+					}
+					else{
+						if (j == 0){
+							if (i == 0) {ctx.fillStyle = "#000000"; ctx.fillRect(j*square,i*square,square,square);}
+							else{
+								ctx.font = "30px Arial";
+								ctx.fillStyle = "#000000";
+								ctx.fillText(letter((i-1).toString()), 25, (square*(i+1)) - ((square/2)-15));
+							}
+						}
+						else {
+							if ((j%2 == 0 && i%2 == 0) || (j%2 != 0 && i%2 != 0)){ ctx.fillStyle = "#859398"; }  // #0000FF
+							else{ctx.fillStyle = "#283048";}	                                    			 // #FF0000
+							ctx.fillRect(j*square,i*square,square,square);
+						}
+					}
+				}
+			}
+		}
+
+		function start_canvas(str, rows, cols, square, interval){
+			draw_board(rows, cols, square);
+			
+			var canvas = document.getElementById("myCanvas");
+			var ctx = canvas.getContext("2d");
+			var arr = str.split(" ");
+			var i = 1;
+			var prev1, prev2;
+			var pos1, pos2;
+			var html;
+			
+			prev1 = arr[0].split(',')[0];
+			prev2 = arr[0].split(',')[1];
+			
+			ctx.lineWidth = 3;
+			ctx.arc(position(parseInt(prev2) + 2, square), position(parseInt(prev1) + 2, square),7,0,2*Math.PI);
+			ctx.stroke();
+			
+			setInterval( function(){
+				pos1 = arr[i].split(',')[0];
+				pos2 = arr[i].split(',')[1];
+				
+				html = document.getElementById("moves");
+				document.getElementById("moves").innerHTML = html.innerHTML + letter(pos1) + number(pos2) + " ";
+				
+				ctx.moveTo(position(parseInt(prev2) + 2, square), position(parseInt(prev1) + 2, square));
+				ctx.lineTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+				ctx.stroke();
+
+				prev1 = arr[i].split(',')[0];
+				prev2 = arr[i].split(',')[1];
+				  
+				i++;
+				if (i == arr.length){
+					document.getElementById("moves").innerHTML = html.innerHTML + "END";
+					
+					prev1 = arr[arr.length-2].split(',')[0];
+					prev2 = arr[arr.length-2].split(',')[1];
+					
+					pos1 = arr[arr.length-1].split(',')[0];
+					pos2 = arr[arr.length-1].split(',')[1];
+
+					var x_center = position(parseInt(pos2) + 2, square);
+					var y_center = position(parseInt(pos1) + 2, square);
+					var radius = 10;
+					var angle;
+					var x;
+					var y;
+
+					ctx.beginPath();
+					angle = Math.atan2(position(parseInt(pos2) + 2, square) - position(parseInt(prev2) + 2, square), position(parseInt(pos1) + 2, square) - position(parseInt(prev1) + 2, square));
+					x = radius * Math.cos(angle) + x_center;
+					y = radius * Math.sin(angle) + y_center;
+
+					ctx.moveTo(x, y);
+					angle += (1.0/3.0) * (2 * Math.PI)
+					x = radius * Math.cos(angle) + x_center;
+					y = radius * Math.sin(angle) + y_center;
+
+					ctx.lineTo(x, y);
+					angle += (1.0/3.0) * (2 * Math.PI)
+					x = radius *Math.cos(angle) + x_center;
+					y = radius *Math.sin(angle) + y_center;
+
+					ctx.lineTo(x, y);
+					ctx.closePath();
+					ctx.stroke();
+					
+					/*if (arr[arr.length-2].split(',')[0] > pos1){
+						if (arr[arr.length-2].split(',')[1] < pos2){
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) + 5, position(parseInt(pos1) + 2, square) + 15);
+							ctx.stroke();
+								 
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) - 15, position(parseInt(pos1) + 2, square) + 5);
+							ctx.stroke();
+						}
+						else{
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) + 15, position(parseInt(pos1) + 2, square) + 8);
+							ctx.stroke();
+								
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) - 5, position(parseInt(pos1) + 2, square) + 15);
+							ctx.stroke();
+						}
+					}
+					else{
+						 if (arr[arr.length-2].split(',')[1] < pos2){
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) + 3, position(parseInt(pos1) + 2, square) - 15);
+							ctx.stroke();
+
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) - 15, position(parseInt(pos1) + 2, square) - 3);
+							ctx.stroke();
+						}
+						else{
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) - 3, position(parseInt(pos1) + 2, square) - 15);
+							ctx.stroke();
+								
+							ctx.moveTo(position(parseInt(pos2) + 2, square), position(parseInt(pos1) + 2, square));
+							ctx.lineTo(position(parseInt(pos2) + 2, square) + 15, position(parseInt(pos1) + 2, square) -10);
+							ctx.stroke();
+						}
+					}*/
+				}
+			}, interval);
+		}
+	</script>
+	</body>
+</html>
